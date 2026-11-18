@@ -221,7 +221,11 @@ export const groupToNestedTable: DataTransformerInfo<
             const rule = findMatchingRule(field, frame, data, options.rules)!;
             const fieldName = getFieldDisplayName(field);
             const { aggregations } = rule;
+            // Pre-create one array per aggregation so fields exist even when there are no groups (no rows)
             const valuesByAggregation: Record<string, unknown[]> = {};
+            for (const aggregation of aggregations) {
+              valuesByAggregation[aggregation] = [];
+            }
 
             valuesByGroupKey.forEach((value) => {
               const fieldWithValuesForGroup = value[fieldName];

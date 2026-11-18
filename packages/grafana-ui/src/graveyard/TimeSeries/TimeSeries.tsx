@@ -2,6 +2,7 @@ import { Component } from 'react';
 import * as React from 'react';
 
 import { DataFrame, TimeRange } from '@grafana/data';
+import { LegendDisplayMode } from '@grafana/schema';
 
 import { PanelContextRoot } from '../../components/PanelChrome/PanelContext';
 import { hasVisibleLegendSeries, PlotLegend } from '../../components/uPlot/PlotLegend';
@@ -39,7 +40,10 @@ class UnthemedTimeSeries extends Component<TimeSeriesProps> {
   renderLegend = (config: UPlotConfigBuilder) => {
     const { legend, frames } = this.props;
 
-    if (!config || (legend && !legend.showLegend) || !hasVisibleLegendSeries(config, frames)) {
+    // A hidden legend must not render a legend container: it measures 0 height, which VizLayout treats as
+    // "not measured yet", so the chart would never render.
+    const legendHidden = !legend?.showLegend || legend?.displayMode === LegendDisplayMode.Hidden;
+    if (!config || (legend && legendHidden) || !hasVisibleLegendSeries(config, frames)) {
       return null;
     }
 
